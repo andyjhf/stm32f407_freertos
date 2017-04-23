@@ -31,9 +31,15 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include "pwm1.h"
+#include "uart2.h"
+#include "key.h"
+#include "sample_task.h"
+#include "user_app_def.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -43,7 +49,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-osThreadId LEDThread1Handle, LEDThread2Handle;
+osThreadId LEDThread1Handle, LEDThread2Handle, PWMThread2Handle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -52,6 +58,7 @@ void Error_Handler(void);
 static void MX_GPIO_Init(void);
 static void LED_Thread1(void const *argument);
 static void LED_Thread2(void const *argument);
+static void PWM_Thread1(void const *argument);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -94,22 +101,32 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-
+	
+	KEY_Init();
+	
+	if(USART2_Init() != HAL_OK)
+		Error_Handler();
   /* USER CODE BEGIN 2 */
 	LED_Init();
+	
+	sample_task_init();
   /* USER CODE END 2 */
 	/* Thread 1 definition */
   osThreadDef(LED3, LED_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   
   /* Thread 2 definition */
   osThreadDef(LED4, LED_Thread2, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	
+	osThreadDef(PWM, PWM_Thread1, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
 
   /* Start thread 1 */
   LEDThread1Handle = osThreadCreate(osThread(LED3), NULL);
 
   /* Start thread 2 */
   LEDThread2Handle = osThreadCreate(osThread(LED4), NULL);
-
+	
+	PWMThread2Handle = osThreadCreate(osThread(PWM), NULL);
+	printf("start...\r\n");
   /* Start scheduler */
   osKernelStart();
   /* Infinite loop */
@@ -124,6 +141,43 @@ int main(void)
   /* USER CODE END 3 */
 
 }
+static void PWM_Thread1(void const *argument)
+{
+	uint8_t speed = 5;
+  (void) argument;
+	
+	pwm1_init();
+	pwm1_start(PWM_CHANNEL_4, speed);
+  for (;;)
+  {
+		if(osSemaphoreWait(osSemaphore_key0 , 50) == osOK)
+		{
+			speed++;
+			if(speed > 9)
+				speed = 9;
+			printf("speed: %d\r\n",speed);
+			pwm1_stop(PWM_CHANNEL_4);
+			pwm1_start(PWM_CHANNEL_4, speed);
+		}
+		if(osSemaphoreWait(osSemaphore_key1 , 50) == osOK)
+		{
+			speed--;
+			if(speed < 1)
+				speed = 1;
+			printf("speed: %d\r\n",speed);
+			pwm1_stop(PWM_CHANNEL_4);
+			pwm1_start(PWM_CHANNEL_4, speed);
+		}
+		if(osSemaphoreWait(osSemaphore_wkup , 50) == osOK)
+		{
+			printf("motor stop\r\n");
+			pwm1_stop(PWM_CHANNEL_4);
+		}
+    osDelay(100);
+
+	}
+}	
+
 
 /**
   * @brief  Toggle LED3 thread 1
@@ -325,6 +379,17 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+int fputc(int ch, FILE *f)
+{
+
+	USART2_Write((uint8_t *) &ch , 1);
+
+	while (USART2_GetStatus() == USART_TX);
+
+	return ch;
+}
+
 
 /**
   * @brief  This function is executed in case of error occurrence.
