@@ -60,7 +60,7 @@ void pwm1_init(void)
   */
   /* Common configuration for all channels */
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 
   GPIO_InitStruct.Alternate = TIMx_GPIO_AF_CHANNEL3;
