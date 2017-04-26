@@ -10,6 +10,8 @@ static void Sample_Task_Thread(void const *argument);
 
 void sample_task_init(void)
 {
+	
+	KEY_Init();
 	  /* Define used semaphore */
   osSemaphoreDef(KEY0_SEM);
 	osSemaphoreDef(KEY1_SEM);
@@ -23,7 +25,7 @@ void sample_task_init(void)
 	osSemaphoreWait(osSemaphore_key1 , 0);
 	osSemaphoreWait(osSemaphore_wkup , 0);
   
-	osThreadDef(Sample_Task,  Sample_Task_Thread, osPriorityAboveNormal, 0, configMINIMAL_STACK_SIZE);
+	osThreadDef(Sample_Task,  Sample_Task_Thread, osPriorityHigh, 0, configMINIMAL_STACK_SIZE);
 	SampleTaskThreadHandle = osThreadCreate(osThread(Sample_Task), NULL);
 	
 

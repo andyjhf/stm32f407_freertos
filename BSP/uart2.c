@@ -172,11 +172,11 @@ uint8_t USART2_Write(uint8_t* pData, uint8_t len)
 {
 	if(len < 1)
 		return 0;
+	USART2_PreTransmit();
 	while(len--)
 	{
 		g_usart2.txBuff[g_usart2.txEnd++] = *pData++;
 	}
-	USART2_PreTransmit();
 	USART2_StartSend();
 	return g_usart2.txEnd;
 }
