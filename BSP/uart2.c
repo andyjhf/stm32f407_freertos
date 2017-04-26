@@ -4,7 +4,7 @@
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* User can use this section to tailor USARTx/UARTx instance used and associated 
-   resources */
+resources */
 UART_HandleTypeDef UartHandle;
 /* Definition for USARTx clock resources */
 #define USARTx                           USART2
