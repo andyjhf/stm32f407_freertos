@@ -425,11 +425,6 @@
               <FilePath>..\UserApp\Src\main.c</FilePath>
             </File>
             <File>
-              <FileName>stm32f4xx_hal_msp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\UserApp\Src\stm32f4xx_hal_msp.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\UserApp\Src\stm32f4xx_it.c</FilePath>

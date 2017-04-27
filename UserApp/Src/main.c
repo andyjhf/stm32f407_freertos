@@ -123,7 +123,7 @@ int main(void)
   /* Start thread 2 */
   LEDThread2Handle = osThreadCreate(osThread(LED4), NULL);
 	
-//	printf("start...\r\n");
+	printf("start...\r\n");
   /* Start scheduler */
   osKernelStart();
   /* Infinite loop */
@@ -317,7 +317,7 @@ void SystemClock_Config(void)
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
   /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+//  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 /** Configure pins as 
