@@ -23,10 +23,6 @@
 */
 
 
-#define KEY0_PRES 	1
-#define KEY1_PRES		2
-#define WKUP_PRES   3
-
 void KEY_Init(void);	//IO初始化
 uint8_t KEY_Scan(uint8_t);  		//按键扫描函数	
 

@@ -4,7 +4,7 @@
 
 osThreadId  SampleTaskThreadHandle;
 osSemaphoreId osSemaphore_key0, osSemaphore_key1, osSemaphore_wkup;
-
+osMessageQId 	osMessage_key_status;
 static void Sample_Task_Thread(void const *argument);
 
 
@@ -16,7 +16,10 @@ void sample_task_init(void)
   osSemaphoreDef(KEY0_SEM);
 	osSemaphoreDef(KEY1_SEM);
 	osSemaphoreDef(WKUP_SEM);
+	
+	osMessageQDef(Key_status, 10, uint32_t);
   
+	osMessage_key_status = osMessageCreate(osMessageQ(Key_status), 0);
   /* Create the semaphore . */
   osSemaphore_key0 = osSemaphoreCreate(osSemaphore(KEY0_SEM) , 1);
   osSemaphore_key1 = osSemaphoreCreate(osSemaphore(KEY1_SEM) , 1);
@@ -35,11 +38,15 @@ static void Sample_Task_Thread(void const *argument)
 {
   (void) argument;
 	uint8_t key_value = 0;
+	osStatus status;
 	for(;;)
 	{
 		/**********key sample*************/
 		key_value = KEY_Scan(0);
-		switch(key_value)
+		if(key_value != 0)
+			status = osMessagePut(osMessage_key_status, key_value, 0);
+		status = 0;
+/*		switch(key_value)
 		{
 			case KEY0_PRES:
 				printf("Press KEY0\r\n");
@@ -53,9 +60,13 @@ static void Sample_Task_Thread(void const *argument)
 				printf("Press WKUP\r\n");
 				osSemaphoreRelease(osSemaphore_wkup);
 			break;
+			case KEY_RELEASE:
+				printf("Release KEY\r\n");
+				osSemaphoreRelease(osSemaphore_wkup);
+			break;
 		
 		
-		}
+		}*/
 		/**********key sample*************/
 	
 	
@@ -73,9 +84,25 @@ static uint8_t KEY_Scan(uint8_t mode)
 	{
 		osDelay(10);//去抖动 
 		key_up=0;
-		if(KEY0==0)return 1;
-		else if(KEY1==0)return 2;
-		else if(WK_UP==1)return 3;
-	}else if(KEY0==1&&KEY1==1&&WK_UP==0)key_up=1; 	    
+		if(KEY0==0)
+		{
+			key_up=0;
+			return KEY0_PRES;
+		}
+		else if(KEY1==0)
+		{
+			key_up=0;
+			return KEY1_PRES;
+		}
+		else if(WK_UP==1)
+		{
+			key_up=0;
+			return WKUP_PRES;
+		}
+	}else if(key_up==0&&KEY0==1&&KEY1==1&&WK_UP==0)
+	{
+		key_up=1;
+		return KEY_RELEASE;
+	}
  	return 0;// 无按键按下
 }

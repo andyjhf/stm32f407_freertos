@@ -22,9 +22,53 @@ static void motor_thread(void const *argument)
 {
 	(void) argument;
 	uint8_t speed = 5;
+	osEvent key_event;
 
   for (;;)
   {
+		key_event = osMessageGet(osMessage_key_status, 0);
+		if(key_event.status == osEventMessage)
+		{
+			switch(key_event.value.v)
+			{
+				case KEY0_PRES:
+					motor_dir_ctl(MOTOR_LEFT, MOTOR_FORWARD);
+					motor_dir_ctl(MOTOR_RIGHT, MOTOR_FORWARD);
+					printf("speed: %d  dir: MOTOR_FORWARD\r\n",speed);
+					pwm1_start(PWM_CHANNEL_4, speed);
+					pwm1_start(PWM_CHANNEL_3, speed);
+				break;
+				case KEY1_PRES:
+					motor_dir_ctl(MOTOR_LEFT, MOTOR_BACK);
+					motor_dir_ctl(MOTOR_RIGHT, MOTOR_BACK);
+					printf("speed: %d  dir: MOTOR_BACK\r\n",speed);
+					pwm1_start(PWM_CHANNEL_4, speed);
+					pwm1_start(PWM_CHANNEL_3, speed);
+				break;
+				case WKUP_PRES:
+					motor_dir_ctl(MOTOR_LEFT, MOTOR_FORWARD);
+					motor_dir_ctl(MOTOR_RIGHT, MOTOR_FORWARD);
+					printf("speed: %d  dir: MOTOR_TURN_RIGHT\r\n",speed);
+					if(speed > 2)
+					{
+						pwm1_start(PWM_CHANNEL_4, speed);
+						pwm1_start(PWM_CHANNEL_3, speed-2);
+					}else
+					{
+						pwm1_start(PWM_CHANNEL_4, speed);
+						pwm1_stop(PWM_CHANNEL_3);
+					}
+				break;
+				case KEY_RELEASE:
+					printf("motor stop\r\n");
+					pwm1_stop(PWM_CHANNEL_4);
+					pwm1_stop(PWM_CHANNEL_3);
+				break;			
+			}
+		}
+		
+		
+/*		
 		if(osSemaphoreWait(osSemaphore_key0 , 50) == osOK)
 		{
 //			speed++;
@@ -32,7 +76,7 @@ static void motor_thread(void const *argument)
 //				speed = 9;
 			pwm1_stop(PWM_CHANNEL_3);
 			pwm1_stop(PWM_CHANNEL_4);
-			osDelay(100);
+			osDelay(1000);
 			motor_dir_ctl(MOTOR_LEFT, MOTOR_FORWARD);
 			motor_dir_ctl(MOTOR_RIGHT, MOTOR_FORWARD);
 			printf("speed: %d  dir: MOTOR_FORWARD\r\n",speed);
@@ -46,7 +90,7 @@ static void motor_thread(void const *argument)
 //				speed = 1;
 			pwm1_stop(PWM_CHANNEL_3);
 			pwm1_stop(PWM_CHANNEL_4);
-			osDelay(100);
+			osDelay(1000);
 			motor_dir_ctl(MOTOR_LEFT, MOTOR_BACK);
 			motor_dir_ctl(MOTOR_RIGHT, MOTOR_BACK);
 			printf("speed: %d  dir: MOTOR_BACK\r\n",speed);
@@ -60,7 +104,7 @@ static void motor_thread(void const *argument)
 			pwm1_stop(PWM_CHANNEL_3);
 		}
     osDelay(100);
-
+*/
 	}
 
 }
